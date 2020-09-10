@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createProject } from "../../store/actions/projectActions";
 import { connect } from 'react-redux';
+import {Redirect} from 'react-router-dom';
 
 function CreateProject(props) {
 
@@ -8,6 +9,11 @@ function CreateProject(props) {
         title: "",
         content: ""
     });
+
+
+    const { projects, auth } = props;
+    if (!auth.uid) return <Redirect to='/signin' />
+
 
     const changeHandler = (event) => {
         setValues({
@@ -39,10 +45,15 @@ function CreateProject(props) {
     );
 }
 
+const mapStateToProps = (state) => {
+    return {
+        auth: state.firebase.auth
+    }
+}
 const mapDispatchToProps = (dispatch) => {
     return {
         createProject: (project) => dispatch(createProject(project))
     }
 }
 
-export default connect(null, mapDispatchToProps)(CreateProject);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateProject);

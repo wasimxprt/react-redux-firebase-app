@@ -8,9 +8,11 @@ import rootReducer from './store/reducers/rootReducer';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { reduxFirestore, getFirestore, createFirestoreInstance } from 'redux-firestore';
-import { ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase';
+import { reactReduxFirebase, ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase';
 import fbConfig from './config/fbConfig';
 import firebase from "firebase/app";
+import { connect } from 'react-redux'
+import Spinner from './components/auth/Spinner';
 
 
 const store = createStore(rootReducer,
@@ -24,13 +26,27 @@ const rrfProps = {
   firebase,
   config: fbConfig,
   dispatch: store.dispatch,
-  createFirestoreInstance
+  createFirestoreInstance,
+  attachAuthIsReady: true,
+  useFirestoreForProfile: true,
+  userProfile: 'users',
 };
+
+
+const mapStateToProps = (state) => ({
+  authIsLoaded: state.firebase.auth && state.firebase.auth.isLoaded,
+});
+const WaitTillAuth = connect(mapStateToProps)(({ authIsLoaded }) => {
+  if (!authIsLoaded) return <Spinner />;
+  return (
+    <App />
+  );
+});
 
 ReactDOM.render(
   <Provider store={store}>
     <ReactReduxFirebaseProvider {...rrfProps}>
-      <App />
+      <WaitTillAuth />
     </ReactReduxFirebaseProvider>
   </Provider>,
   document.getElementById('root')
